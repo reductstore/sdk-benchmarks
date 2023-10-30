@@ -1,0 +1,24 @@
+version: "3"
+services:
+  reductstore:
+    image: reduct/store:latest
+    ports:
+      - "8383:8383"
+    volumes:
+        - ./data:/data
+    environment:
+      RS_DATA_PATH: /data
+      RS_API_TOKEN: token
+      RS_BUCKET_1_NAME: benchmark
+      RS_BUCKET_1_QUOTA_TYPE: FIFO
+      RS_BUCKET_1_QUOTA_SIZE: 10GB
+
+  bench-py:
+    build:
+        context: ./python
+    depends_on:
+        - reductstore
+    environment:
+        PYTHONUNBUFFERED: 1
+    volumes:
+      - ./results:/results
