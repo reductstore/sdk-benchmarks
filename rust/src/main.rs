@@ -32,7 +32,7 @@ async fn bench(record_size: usize, record_num: usize) -> Result<BenchResult, Red
     };
 
     let client = ReductClient::builder()
-        .url("http://127.0.0.1:8383")
+        .url("http://reductstore:8383")
         .api_token("token")
         .build();
 
@@ -74,7 +74,7 @@ async fn bench(record_size: usize, record_num: usize) -> Result<BenchResult, Red
 async fn main() -> Result<(), ReductError> {
     const RECORD_NUM: usize = 1000;
     let base:i32 = 2;
-    let mut file = std::fs::File::create("rust.csv")?;
+    let mut file = std::fs::File::create("/results/rust.csv")?;
     for record_size in (0..15).map(|x| base.pow(x) * 1024) {
         let result = bench(record_size as usize, RECORD_NUM).await?;
         println!("{}", result);
