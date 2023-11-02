@@ -1,11 +1,11 @@
 version: "3"
 services:
   reductstore:
-    image: reduct/store:v1.7.2
+    image: reduct/store:latest
     ports:
       - "8383:8383"
     volumes:
-        - ./data:/data
+        - data:/data
     environment:
       RS_DATA_PATH: /data
       RS_API_TOKEN: token
@@ -30,3 +30,6 @@ services:
         - reductstore
     volumes:
       - ./results:/results
+
+volumes:
+    data:

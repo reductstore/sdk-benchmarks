@@ -1,0 +1,8 @@
+{
+  "name": "bench",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "reduct-js": "^1.7.3"
+  }
+}
