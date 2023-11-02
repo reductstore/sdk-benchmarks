@@ -1,7 +1,7 @@
 version: "3"
 services:
   reductstore:
-    image: reduct/store:latest
+    image: reduct/store:v1.7.2
     ports:
       - "8383:8383"
     volumes:

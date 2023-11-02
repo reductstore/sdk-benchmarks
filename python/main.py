@@ -1,5 +1,4 @@
 import asyncio
-from dataclasses import dataclass
 import time
 from datetime import datetime
 
@@ -63,7 +62,8 @@ async def bench(record_size: int, record_num: int) -> Result:
             async for chunk in record.read(n=1024):
                 count += len(chunk)
 
-        assert count == record_num * record_size
+        if count != record_num * record_size:
+            raise Exception(f"Read {count} bytes, expected {record_num * record_size} bytes.")
 
         delta = (datetime.now() - start_time).total_seconds()
         result.read_req_per_sec = int(record_num / delta)
