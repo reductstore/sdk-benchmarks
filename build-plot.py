@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-LANGS = ["python", "rust"]
+LANGS = ["rust", "node"]
 SIZES = ["1K", "2K", "4K", "8K", "16K", "32K", "64K", "128K", "256K", "512K", "1M", "2M", "4M", "8M", "16M", "32M",
         "64M", "128M", "256M"]
 if __name__ == "__main__":

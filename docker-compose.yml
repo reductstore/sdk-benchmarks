@@ -5,7 +5,7 @@ services:
     ports:
       - "8383:8383"
     volumes:
-        - data:/data
+      - data:/data
     environment:
       RS_DATA_PATH: /data
       RS_API_TOKEN: token
@@ -15,21 +15,29 @@ services:
 
   bench-py:
     build:
-        context: ./python
+      context: ./python
     depends_on:
-        - reductstore
+      - reductstore
     environment:
-        PYTHONUNBUFFERED: 1
+      PYTHONUNBUFFERED: 1
     volumes:
       - ./results:/results
 
   bench-rust:
     build:
-        context: ./rust
+      context: ./rust
     depends_on:
-        - reductstore
+      - reductstore
+    volumes:
+      - ./results:/results
+
+  bench-node:
+    build:
+      context: ./node
+    depends_on:
+      - reductstore
     volumes:
       - ./results:/results
 
 volumes:
-    data:
+  data:
