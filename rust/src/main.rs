@@ -57,13 +57,17 @@ async fn bench(record_size: usize, record_num: usize) -> Result<BenchResult, Red
     let start_time = std::time::Instant::now();
 
     tokio::pin!(query);
+
+    let mut count = 0;
     while let Some(record) = query.next().await {
         let mut stream = record?.stream_bytes();
         while let Some(chunk) = stream.next().await {
-            let _ = chunk?;
+            let chunk = chunk?;
+            count += chunk.len();
         }
     }
 
+    assert_eq!(count, record_num * record_size, "Check read data size");
     let delta = start_time.elapsed();
     result.read_req_per_sec = record_num as f64 / delta.as_secs_f64();
     result.read_bytes_per_sec = record_num as f64 * record_size as f64 / delta.as_secs_f64();

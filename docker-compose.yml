@@ -11,7 +11,7 @@ services:
       RS_API_TOKEN: token
       RS_BUCKET_1_NAME: benchmark
       RS_BUCKET_1_QUOTA_TYPE: FIFO
-      RS_BUCKET_1_QUOTA_SIZE: 10GB
+      RS_BUCKET_1_QUOTA_SIZE: 50GB
 
   bench-py:
     build:
