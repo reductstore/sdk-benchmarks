@@ -1,6 +1,7 @@
 #include <reduct/client.h>
 #include <iostream>
 #include <cmath>
+#include <fstream>
 
 
 using reduct::IClient;
@@ -78,18 +79,20 @@ auto bench = [](auto record_size, auto record_count) -> Result {
     return result;
 };
 
+template<typename Os>
+void print_result(Os &os, const Result &result) {
+    os << result.record_size << "," << result.record_count << "," << result.write_rec_per_sec << ","
+        << result.write_bytes_per_sec << "," << result.read_rec_per_sec << "," << result.read_bytes_per_sec
+        << std::endl;
+}
+
 int main() {
-    std::cout << "Benchmarking..." << std::endl;
+
+    std::ofstream csv("/results/cpp.csv");
     for (auto i = 0; i < 15; ++i) {
         auto result = bench(std::pow(2, i) * 1024, 1000);
-        std::cout << "Record size: " << result.record_size << std::endl;
-        std::cout << "Record count: " << result.record_count << std::endl;
-        std::cout << "Write records per sec: " << result.write_rec_per_sec << std::endl;
-        std::cout << "Write bytes per sec: " << result.write_bytes_per_sec << std::endl;
-        std::cout << "Read records per sec: " << result.read_rec_per_sec << std::endl;
-        std::cout << "Read bytes per sec: " << result.read_bytes_per_sec << std::endl;
-        std::cout << std::endl;
-
+        print_result(csv, result);
+        print_result(std::cout, result);
     }
     return 0;
 }

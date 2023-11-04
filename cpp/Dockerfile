@@ -4,10 +4,11 @@ RUN apt update && \
     apt install -y build-essential cmake zip wget git libssl-dev libzip-dev
 
 
+ARG VERSION=1.7.1
 WORKDIR /install
-RUN wget https://github.com/reductstore/reduct-cpp/archive/refs/tags/v1.7.0.zip
-RUN unzip v1.7.0.zip
-RUN cd reduct-cpp-1.7.0 && \
+RUN wget https://github.com/reductstore/reduct-cpp/archive/refs/tags/v${VERSION}.zip
+RUN unzip v${VERSION}.zip
+RUN cd reduct-cpp-${VERSION} && \
     mkdir build && \
     cd build && \
     cmake .. && \
