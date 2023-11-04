@@ -52,7 +52,7 @@ const bench = async (recordSize, recordNum) => {
 
 const main = async () => {
     const csvFile = fs.createWriteStream("/results/node.csv");
-    for (let i = 0; i < 14; i++) {
+    for (let i = 0; i < 15; i++) {
         const result = await bench(2 ** i * 1024, RECORD_NUM);
         console.log(result);
         csvFile.write(result.join(",") + "\n");
