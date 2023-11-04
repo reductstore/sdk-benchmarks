@@ -39,5 +39,13 @@ services:
     volumes:
       - ./results:/results
 
+  bench-cpp:
+    build:
+      context: ./cpp
+    depends_on:
+      - reductstore
+    volumes:
+      - ./results:/results
+
 volumes:
   data:
