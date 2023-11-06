@@ -20,7 +20,7 @@ COPY main.cc .
 COPY CMakeLists.txt .
 RUN mkdir build && \
     cd build && \
-    cmake .. && \
+    cmake .. -DCMAKE_BUILD_TYPE=Release && \
     make
 
 CMD ["./build/bench-cpp"]

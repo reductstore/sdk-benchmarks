@@ -8,9 +8,14 @@ const RECORD_NUM = 1000;
  * Get current time in microsecond
  * @returns {bigint}
  */
+let offset = 0n;
 const now_us = () => {
-    const [s, ns] = hrtime();
-    return BigInt(s) * 1000000n + BigInt(ns) / 1000n;
+    // It is not possible to get microsecond precision in JS, so we use some offset to make timestamps unique
+    offset += 1n;
+    if (offset > 1000n) {
+        offset = 0n;
+    }
+    return BigInt(Date.now()) * 1000n +  offset;
 }
 
 const bench = async (recordSize, recordNum) => {
@@ -35,7 +40,9 @@ const bench = async (recordSize, recordNum) => {
 
     start = new Date();
     let count = 0;
-    for await (const record of bucket.query("node-bench", measureTime, now_us(),)) {
+    for await (const record of bucket.query("node-bench", measureTime, undefined, {
+        limit: recordNum,
+    })) {
         const data = await record.read();
         count += data.toString().length;
     }
