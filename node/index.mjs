@@ -10,12 +10,13 @@ const RECORD_NUM = 1000;
  */
 let offset = 0n;
 const now_us = () => {
-    // It is not possible to get microsecond precision in JS, so we use some offset to make timestamps unique
     offset += 1n;
-    if (offset > 1000n) {
-        offset = 0n;
+    // It is not possible to get microsecond precision in JS, so we use some offset to make timestamps unique
+    if (offset === 1000n) {
+        offset = 1n;
     }
-    return BigInt(Date.now()) * 1000n +  offset;
+
+    return BigInt(Date.now()) * 1000n + offset;
 }
 
 const bench = async (recordSize, recordNum) => {

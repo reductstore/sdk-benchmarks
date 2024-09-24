@@ -1,4 +1,4 @@
-FROM rust:1.73
+FROM rust:latest
 
 COPY src src
 COPY Cargo.toml Cargo.toml
