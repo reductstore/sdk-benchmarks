@@ -1,11 +1,15 @@
 import asyncio
 import time
 from datetime import datetime
+from time import sleep
 
-from reduct import Client, Bucket
+from reduct import Client, Bucket, Batch
 
-RECORD_NUM = 1000
-RECORD_SIZES = [2**x * 1024 for x in range(15)]  # 1 KiB ~ 16 MiB
+RECORD_NUM = 2000
+RECORD_SIZES = [2 ** x * 1024 for x in range(11)]  # 1 KiB ~ 4 MiB
+
+MAX_BATCH_SIZE = 8_000_000
+MAX_BATCH_RECORDS = 80
 
 
 class Result:
@@ -45,11 +49,20 @@ async def bench(record_size: int, record_num: int) -> Result:
 
     measure_time = time.time_ns() // 1000
     async with Client("http://reductstore:8383", api_token="token") as client:
-        bucket: Bucket = await client.get_bucket("benchmark")
+        bucket: Bucket = await client.create_bucket(f"benchmark-{measure_time}")
         record_data = b"0" * record_size
         start_time = datetime.now()
+
+        batch = Batch()
         for i in range(record_num):
-            await bucket.write("python-bench", record_data, time.time_ns() // 1000)
+            batch.add(i, record_data)
+            if len(batch) >= MAX_BATCH_RECORDS or batch.size >= MAX_BATCH_SIZE:
+                await bucket.write_batch(f"python-bench", batch)
+                batch.clear()
+
+        if len(batch) > 0:
+            await bucket.write_batch("python-bench", batch)
+
         delta = (datetime.now() - start_time).total_seconds()
         result.write_req_per_sec = int(record_num / delta)
         result.write_bytes_per_sec = int(record_num * record_size / delta)
@@ -57,9 +70,9 @@ async def bench(record_size: int, record_num: int) -> Result:
         start_time = datetime.now()
         count = 0
         async for record in bucket.query(
-            "python-bench", start=measure_time, limit=record_num
+                "python-bench", start=0, stop=record_num
         ):
-            async for chunk in record.read(n=1024):
+            async for chunk in record.read(n=16_000):
                 count += len(chunk)
 
         if count != record_num * record_size:

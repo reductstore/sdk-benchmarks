@@ -17,6 +17,10 @@ struct Result {
 };
 
 
+const int kMaxBatchSize = 8000000;
+const int kMaxBatchCount = 80;
+
+
 auto bench = [](auto record_size, auto record_count) -> Result {
     auto result = Result{};
     result.record_size = record_size;
@@ -29,21 +33,31 @@ auto bench = [](auto record_size, auto record_count) -> Result {
             }
     );
 
-    auto [bucket, err] = client->GetBucket("benchmark");
+    auto start = IClient::Time::clock::now();
+    auto [bucket, err] = client->CreateBucket("benchmark-" + std::to_string(start.time_since_epoch().count()));
     if (err) {
         throw std::runtime_error("Failed to get bucket: " + err.ToString());
     }
     std::string data(record_size, 'x');
 
-    auto start = IClient::Time::clock::now();
     auto measure_time = start;
-    for (auto i = 0; i < record_count; ++i) {
-        auto write_err = bucket->Write("cpp-bench", std::nullopt, [&data](auto record) {
-            record->WriteAll(data);
+    int sent_count = 0;
+    while (sent_count < record_count) {
+        auto [map, write_err] = bucket->WriteBatch("cpp-bench", [&](auto batch) {
+            for (int i = 0;
+                 i < kMaxBatchCount && sent_count < record_count && batch->size() < kMaxBatchSize;
+                 ++i, ++sent_count) {
+                batch->AddRecord(measure_time + std::chrono::microseconds(sent_count), data);
+            }
         });
+
         if (write_err) {
             throw std::runtime_error("Failed to write record: " + write_err.ToString());
-        };
+        }
+
+        if (!map.empty()) {
+            throw std::runtime_error("Failed to write record: " + map.begin()->second.ToString());
+        }
     }
 
     auto end = IClient::Time::clock::now();
@@ -53,7 +67,7 @@ auto bench = [](auto record_size, auto record_count) -> Result {
 
     size_t count = 0;
     start = IClient::Time::clock::now();
-    err = bucket->Query("cpp-bench", measure_time, std::nullopt, {}, [&count](auto record) {
+    err = bucket->Query("cpp-bench", std::nullopt, std::nullopt, {}, [&count](auto record) {
         auto [content, read_err] = record.ReadAll();
         if (read_err) {
             throw std::runtime_error("Failed to read record: " + read_err.ToString());
@@ -82,15 +96,15 @@ auto bench = [](auto record_size, auto record_count) -> Result {
 template<typename Os>
 void print_result(Os &os, const Result &result) {
     os << result.record_size << "," << result.record_count << "," << result.write_rec_per_sec << ","
-        << result.write_bytes_per_sec << "," << result.read_rec_per_sec << "," << result.read_bytes_per_sec
-        << std::endl;
+       << result.write_bytes_per_sec << "," << result.read_rec_per_sec << "," << result.read_bytes_per_sec
+       << std::endl;
 }
 
 int main() {
 
-    std::ofstream csv("/results/cpp.csv");
-    for (auto i = 0; i < 15; ++i) {
-        auto result = bench(std::pow(2, i) * 1024, 1000);
+    std::ofstream csv("/tmp/cpp.csv");
+    for (auto i = 0; i < 11; ++i) {
+        auto result = bench(std::pow(2, i) * 1024, 2000);
         print_result(csv, result);
         print_result(std::cout, result);
     }

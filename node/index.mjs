@@ -3,7 +3,10 @@ import {Buffer} from "buffer";
 import {hrtime} from "process";
 import fs from "fs";
 
-const RECORD_NUM = 1000;
+const RECORD_NUM = 2000;
+const MAX_BATCH_SIZE = 8000000;
+const MAX_BATCH_RECORDS = 80;
+
 /**
  * Get current time in microsecond
  * @returns {bigint}
@@ -26,13 +29,21 @@ const bench = async (recordSize, recordNum) => {
     });
 
     const measureTime = now_us();
-    const bucket = await client.getBucket("benchmark");
+    const bucket = await client.createBucket(`enchmark-${measureTime}`);
 
     let start = new Date();
     const data = Buffer.alloc(recordSize);
+    const batch = await bucket.beginWriteBatch("node-bench");
     for (let i = 0; i < recordNum; i++) {
-        const record = await bucket.beginWrite("node-bench", now_us());
-        await record.write(data);
+        batch.add(now_us(), data);
+        if (batch.size() >= MAX_BATCH_SIZE || batch.recordCount() >= MAX_BATCH_RECORDS) {
+            await batch.write();
+            batch.clear();
+        }
+    }
+
+    if (batch.recordCount() > 0) {
+        await batch.write();
     }
 
     let elapsed = (new Date() - start) / 1000;
@@ -62,7 +73,7 @@ const bench = async (recordSize, recordNum) => {
 
 const main = async () => {
     const csvFile = fs.createWriteStream("/results/node.csv");
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 11; i++) {
         const result = (await bench(2 ** i * 1024, RECORD_NUM)).map((x) => x.toFixed(2));
         console.log(result);
         csvFile.write(result.join(",") + "\n");

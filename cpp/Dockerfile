@@ -4,7 +4,7 @@ RUN apt update && \
     apt install -y build-essential cmake zip wget git libssl-dev libzip-dev
 
 
-ARG VERSION=1.11.0
+ARG VERSION=1.12.0
 WORKDIR /install
 RUN wget https://github.com/reductstore/reduct-cpp/archive/refs/tags/v${VERSION}.zip
 RUN unzip v${VERSION}.zip

@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-reduct-rs = "1.7.2"
+reduct-rs = "1.12"
 tokio = { version = "1.33.0", features = ["rt", "rt-multi-thread"] }
 bytes = "1.5.0"
 futures-util = "0.3.14"

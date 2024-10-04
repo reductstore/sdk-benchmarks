@@ -1,10 +1,13 @@
 use std::fmt::{Display, Formatter};
 use std::io::Write;
 use std::pin::pin;
-use std::time::SystemTime;
-use reduct_rs::{ReductClient, ReductError};
+use std::time::{SystemTime, UNIX_EPOCH};
+use reduct_rs::{Record, ReductClient, ReductError};
 use bytes::Bytes;
 use futures_util::StreamExt;
+
+const MAX_BATCH_RECORDS: usize = 90;
+const MAX_BATCH_SIZE: usize = 8_000_000;
 
 struct BenchResult {
     write_req_per_sec: f64,
@@ -36,16 +39,27 @@ async fn bench(record_size: usize, record_num: usize) -> Result<BenchResult, Red
         .api_token("token")
         .build();
 
-    let bucket = client.get_bucket("benchmark").await?;
-    let record_data = Bytes::from(vec![0; record_size]);
+    let bucket = client.create_bucket(&format!("benchmark-{}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis())).send().await?;
 
+    let record_data = Bytes::from(vec![0; record_size]);
     let start_time = std::time::Instant::now();
     let measure_time = SystemTime::now();
-    for _ in 0..record_num {
-        bucket.write_record("rust-bench")
+
+    let mut batch = bucket.write_batch("rust-bench");
+    for i in 0..record_num {
+        batch.append_record(Record::builder()
             .data(record_data.clone())
-            .send()
-            .await?;
+            .timestamp_us(i as u64)
+            .build());
+
+        if batch.size() >= MAX_BATCH_SIZE || batch.record_count() >= MAX_BATCH_RECORDS {
+            batch.send().await?;
+            batch = bucket.write_batch("rust-bench");
+        }
+    }
+
+    if batch.record_count() > 0 {
+        batch.send().await?;
     }
 
     let delta = start_time.elapsed();
@@ -53,7 +67,7 @@ async fn bench(record_size: usize, record_num: usize) -> Result<BenchResult, Red
     result.write_bytes_per_sec = record_num as f64 * record_size as f64 / delta.as_secs_f64();
 
 
-    let mut query = bucket.query("rust-bench").start(measure_time).limit(record_num as u64).send().await?;
+    let query = bucket.query("rust-bench").start_us(0).limit(record_num as u64).send().await?;
     let start_time = std::time::Instant::now();
 
     tokio::pin!(query);
@@ -76,10 +90,10 @@ async fn bench(record_size: usize, record_num: usize) -> Result<BenchResult, Red
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), ReductError> {
-    const RECORD_NUM: usize = 1000;
+    const RECORD_NUM: usize = 2000;
     let base:i32 = 2;
     let mut file = std::fs::File::create("/results/rust.csv")?;
-    for record_size in (0..15).map(|x| base.pow(x) * 1024) {
+    for record_size in (0..11).map(|x| base.pow(x) * 1024) {
         let result = bench(record_size as usize, RECORD_NUM).await?;
         println!("{}", result);
         file.write(format!("{}\n", result).as_bytes()).unwrap();
