@@ -45,7 +45,7 @@ func bench(recordSize, recordNum int64) (*Result, error) {
 		RecordNum:  recordNum,
 	}
 
-	client := reduct.NewClient("http://127.0.0.1:8383", reduct.ClientOptions{
+	client := reduct.NewClient("http://reductstore:8383", reduct.ClientOptions{
 		APIToken: "token",
 	})
 
@@ -120,7 +120,7 @@ func bench(recordSize, recordNum int64) (*Result, error) {
 }
 
 func main() {
-	file, err := os.Create("./go.csv")
+	file, err := os.Create("/results/go.csv")
 	if err != nil {
 		panic(err)
 	}

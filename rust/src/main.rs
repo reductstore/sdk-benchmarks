@@ -93,7 +93,7 @@ async fn main() -> Result<(), ReductError> {
     const RECORD_NUM: usize = 2000;
     let base:i32 = 2;
     let mut file = std::fs::File::create("/results/rust.csv")?;
-    for record_size in (0..11).map(|x| base.pow(x) * 1024) {
+    for record_size in (0..13).map(|x| base.pow(x) * 1024) {
         let result = bench(record_size as usize, RECORD_NUM).await?;
         println!("{}", result);
         file.write(format!("{}\n", result).as_bytes()).unwrap();

@@ -6,7 +6,7 @@ from time import sleep
 from reduct import Client, Bucket, Batch
 
 RECORD_NUM = 2000
-RECORD_SIZES = [2 ** x * 1024 for x in range(11)]  # 1 KiB ~ 4 MiB
+RECORD_SIZES = [2 ** x * 1024 for x in range(13)]  # 1 KiB ~ 4 MiB
 
 MAX_BATCH_SIZE = 8_000_000
 MAX_BATCH_RECORDS = 80

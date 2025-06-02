@@ -42,5 +42,13 @@ services:
     volumes:
       - ./results:/results
 
+  bench-go:
+    build:
+      context: ./go
+    depends_on:
+      - reductstore
+    volumes:
+      - ./results:/results
+
 volumes:
   data:

@@ -103,7 +103,7 @@ void print_result(Os &os, const Result &result) {
 int main() {
 
     std::ofstream csv("/tmp/cpp.csv");
-    for (auto i = 0; i < 11; ++i) {
+    for (auto i = 0; i < 13; ++i) {
         auto result = bench(std::pow(2, i) * 1024, 2000);
         print_result(csv, result);
         print_result(std::cout, result);

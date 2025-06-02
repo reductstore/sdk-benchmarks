@@ -2,4 +2,4 @@ module benchmark
 
 go 1.24.1
 
-require github.com/reductstore/reduct-go v0.0.7
+require github.com/reductstore/reduct-go v0.0.8
