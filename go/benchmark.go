@@ -62,7 +62,7 @@ func bench(recordSize, recordNum int64) (*Result, error) {
 	for i := int64(0); i < recordNum; i++ {
 		batch.Add(i, recordData, "text/plain", nil)
 		if batch.Size() >= MaxBatchSize || batch.RecordCount() >= MaxBatchRecords {
-			if err := batch.Write(context.Background()); err != nil {
+			if _, err := batch.Write(context.Background()); err != nil {
 				return nil, err
 			}
 			batch.Clear()
@@ -70,7 +70,7 @@ func bench(recordSize, recordNum int64) (*Result, error) {
 	}
 
 	if batch.RecordCount() > 0 {
-		if err := batch.Write(context.Background()); err != nil {
+		if _, err := batch.Write(context.Background()); err != nil {
 			return nil, err
 		}
 	}
