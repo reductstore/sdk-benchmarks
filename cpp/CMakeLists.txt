@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.23)
 
 project(bench-cpp)
 set(CMAKE_CXX_STANDARD 20)
@@ -8,7 +8,7 @@ find_package(OpenSSL)
 
 
 
-find_package(ReductCpp 1.7.0)
+find_package(reductcpp 1.16.0 REQUIRED)
 
 add_executable(bench-cpp main.cc)
-target_link_libraries(bench-cpp ${REDUCT_CPP_LIBRARIES} ${ZLIB_LIBRARIES} OpenSSL::SSL OpenSSL::Crypto)
+target_link_libraries(bench-cpp reductcpp::reductcpp ${ZLIB_LIBRARIES} OpenSSL::SSL OpenSSL::Crypto)
