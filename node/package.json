@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "reduct-js": "^1.16.0"
+    "reduct-js": "^1.16.0",
+    "undici": "^7.13.0"
   }
 }
