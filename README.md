@@ -20,5 +20,5 @@ This repository contains a benchmark for the ReductStore Client SDKs:
 ### Running the benchmark
 
 1. Clone this repository
-2. Run `docker-compose up` in the root directory of this repository
+2. Run `docker compose up --build` in the root directory of this repository (comment out the SDKs you don't want to benchmark in the `docker-compose.yml` file to save time and resources)
 3. Run `python3 build-plot.py` in the root directory of this repository to build plots from the benchmark results
