@@ -3,6 +3,7 @@ use futures_util::StreamExt;
 use reduct_rs::{condition, Record, ReductClient, ReductError};
 use std::fmt::{Display, Formatter};
 use std::io::Write;
+use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 const MAX_BATCH_RECORDS: usize = 90;
@@ -46,10 +47,12 @@ async fn bench(
         record_num,
     };
 
-    let client = ReductClient::builder()
-        .url("http://reductstore:8383")
-        .api_token("token")
-        .build();
+    let client = Arc::new(
+        ReductClient::builder()
+            .url("http://reductstore:8383")
+            .api_token("token")
+            .build(),
+    );
 
     let bucket = client
         .create_bucket(&format!(
@@ -72,15 +75,11 @@ async fn bench(
     for entry_idx in 0..entry_num {
         let record_data_clone = record_data.clone();
         let bucket_name_clone = bucket_name.clone();
+        let client_clone = Arc::clone(&client);
         let entry_name = format!("rust-bench-{}", entry_idx);
 
         let handle = tokio::spawn(async move {
-            let thread_client = ReductClient::builder()
-                .url("http://reductstore:8383")
-                .api_token("token")
-                .build();
-
-            let thread_bucket = thread_client.get_bucket(&bucket_name_clone).await?;
+            let thread_bucket = client_clone.get_bucket(&bucket_name_clone).await?;
             let mut batch = thread_bucket.write_batch(&entry_name);
 
             for i in 0..records_per_entry {
@@ -119,15 +118,11 @@ async fn bench(
 
     for entry_idx in 0..entry_num {
         let bucket_name_clone = bucket_name.clone();
+        let client_clone = Arc::clone(&client);
         let entry_name = format!("rust-bench-{}", entry_idx);
 
         let handle = tokio::spawn(async move {
-            let thread_client = ReductClient::builder()
-                .url("http://reductstore:8383")
-                .api_token("token")
-                .build();
-
-            let thread_bucket = thread_client.get_bucket(&bucket_name_clone).await?;
+            let thread_bucket = client_clone.get_bucket(&bucket_name_clone).await?;
             let query = thread_bucket
                 .query(&entry_name)
                 .start_us(0)
