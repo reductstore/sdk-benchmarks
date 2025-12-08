@@ -1,4 +1,4 @@
-FROM rust:1.85
+FROM rust:1.89.0
 
 COPY src src
 COPY Cargo.toml Cargo.toml

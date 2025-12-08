@@ -2,3 +2,4 @@ results
 data
 *.png
 rust/target
+.venv
