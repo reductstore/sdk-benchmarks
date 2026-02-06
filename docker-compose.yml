@@ -1,6 +1,6 @@
 services:
   reductstore:
-    image: reduct/store:latest
+    image: reduct/store:v1.18.3
     ports:
       - "8383:8383"
     environment:

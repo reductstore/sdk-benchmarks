@@ -1,1 +1,1 @@
-reduct-py>=1.16
+reduct-py>=1.18

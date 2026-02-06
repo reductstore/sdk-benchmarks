@@ -9,7 +9,7 @@ RUN apt update && \
         libhowardhinnant-date-dev
 
 
-ARG VERSION=1.16.0
+ARG VERSION=1.18.0
 WORKDIR /install
 RUN wget https://github.com/reductstore/reduct-cpp/archive/refs/tags/v${VERSION}.zip
 RUN unzip v${VERSION}.zip

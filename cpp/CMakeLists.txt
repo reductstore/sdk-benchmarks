@@ -8,7 +8,7 @@ find_package(OpenSSL)
 
 
 
-find_package(reductcpp 1.16.0 REQUIRED)
+find_package(reductcpp 1.18.0 REQUIRED)
 
 add_executable(bench-cpp main.cc)
 target_link_libraries(bench-cpp reductcpp::reductcpp ${ZLIB_LIBRARIES} OpenSSL::SSL OpenSSL::Crypto)
