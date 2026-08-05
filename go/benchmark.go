@@ -91,9 +91,14 @@ func bench(recordSize, recordNum int64) (*Result, error) {
 		return nil, err
 	}
 
+	// Allocated once, outside the loop. A buffer this size allocated per record
+	// measures the benchmark's own allocator traffic rather than the SDK: over
+	// 2000 records it is ~1 GB of zeroed memory, which dominates the result at
+	// small record sizes.
+	buf := make([]byte, 512000)
+
 	for rec := range query.Records() {
 		streamReader := rec.Stream()
-		buf := make([]byte, 512000)
 
 		for {
 			n, err := streamReader.Read(buf)
